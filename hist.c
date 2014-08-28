@@ -20,8 +20,6 @@ void
 values_from_image (char * image_file)
 {
   MagickWand *mw = NULL;
-  // Comment out this define to use the region iterator instead of the Draw
-  //#define USE_DRAW
   PixelWand **pixels = NULL;
   size_t i, num_colours;
   char *pc;
@@ -34,22 +32,19 @@ values_from_image (char * image_file)
 
   /* Read the input image */
   MagickReadImage (mw, image_file);
-  fo = fopen ("logo.txt", "w");
+  //fo = fopen ("logo.txt", "w");
   pixels = MagickGetImageHistogram (mw, &num_colours);
-  qsort(pixels,num_colours,sizeof(PixelWand *),sort_hist);
+  //qsort(pixels,num_colours,sizeof(PixelWand *),sort_hist);
   int q = num_colours - 4;
-  float red, green, blue;
+  long red = 0, green = 0, blue = 0;
   int red256, green256, blue256;
-  for (i = q; i < num_colours; i++)
+  for (i = 0; i < num_colours; i++)
     {
-      red = (float)(PixelGetRedQuantum(pixels[i])) * 256 / 65535 ;
-      red256 = (int)red;
-      green = (float)(PixelGetGreenQuantum(pixels[i])) * 256 / 65535 ;
-      green256 = (int)green;
-      blue = (float)(PixelGetBlueQuantum(pixels[i])) * 256 / 65535 ;
-      blue256 = (int)blue;
+      red = red + (PixelGetRedQuantum(pixels[i]));
+      green = green + (PixelGetGreenQuantum(pixels[i]));
+      blue = blue + (PixelGetBlueQuantum(pixels[i]));
       //printf("red %3d, green %3d, blue %3d\n", red256, green256, blue256);
-      printf("%d,%d,%d\n", red256, green256, blue256);
+      //printf("%d,%d,%d\n", red256, green256, blue256);
 /*
       fprintf (fo, "%6d: (", PixelGetColorCount (pixels[i]));
       fprintf (fo, "%d, ", PixelGetRedQuantum (pixels[i])/65535*256  );
@@ -60,8 +55,11 @@ values_from_image (char * image_file)
       fprintf (fo, "\n");
 */
     }
-
-  fclose (fo);
+  red = red / num_colours;
+  green = green / num_colours;
+  blue = blue /num_colours;
+  printf("Totals: %ld %ld %ld\n", red * 256/65535, green * 256/65535, blue * 256/65535);
+  //fclose (fo);
   // Free up the PixelWand array
   RelinquishMagickMemory (pixels);
   if (mw)
