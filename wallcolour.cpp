@@ -33,9 +33,9 @@ ImageRGB::ImageRGB(string image_filename)
     counter++;
   }
   
-  red   = red / counter * 256 / 65535;
-  green = green / counter * 256 / 65535;
-  blue  = blue / counter * 256 / 65535;
+  red   = red / counter * 255 / 65535;
+  green = green / counter * 255 / 65535;
+  blue  = blue / counter * 255 / 65535;
 }
 
 int main(int argc, char **argv)
