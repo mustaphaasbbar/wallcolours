@@ -10,14 +10,12 @@ using namespace std;
 class SchemeFile {
 public:
   SchemeFile(char *);
-  void SchemeReplace();
+  void SchemeReplace(string);
   string baseContents;
 };
 
 SchemeFile::SchemeFile(char * filename)
 {
-  cout << "in constructor" << endl;
-  
   ifstream baseTemplate (filename);
   
   if (baseTemplate.is_open())
@@ -37,11 +35,9 @@ SchemeFile::SchemeFile(char * filename)
 }
   
 
-void SchemeFile::SchemeReplace()
+void SchemeFile::SchemeReplace(string rgb_triplet)
 {
-  cout << "in replace" << endl;
-  string replacement("123,234,345");
-  baseContents.replace(baseContents.find("xxx,xxx,xxx"), replacement.length(), replacement);
+  baseContents.replace(baseContents.find("xxx,xxx,xxx"), rgb_triplet.length(), rgb_triplet);
   cout << baseContents << endl;
 }
 
@@ -53,9 +49,10 @@ int main(int argc, char **argv)
     cout << "Give me something to work with here!" << endl;
     exit(EXIT_FAILURE);
   }
-
+  
+  string schemecolour("123,254,109");
   SchemeFile newone(argv[1]);
-  newone.SchemeReplace();
+  newone.SchemeReplace(schemecolour);
   
   return 0;
 }
