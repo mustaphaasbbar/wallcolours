@@ -1,6 +1,4 @@
-A simple tool so set system colours from the wallpaper image. 
-To compile:
-	g++ -std=c++0x  $(pkg-config --cflags --libs ImageMagick++) -O2 wallcolour.cpp -o wallcolour
+A simple tool so set system colours from the wallpaper image. Simply run make to compile.
 
 To run:
 	./wallcolour [/path/to/image] > myname.colors
