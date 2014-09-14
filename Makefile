@@ -1,10 +1,8 @@
 PROGRAM = wallcolour
 PROGRAM_FILES = wallcolour.cpp
 
-CFLAGS += -O2 $(shell Magick++-config --cxxflags)
-LIBS = -L/usr/lib/i386-linux-gnu
-LIBS   += $(shell Magick++-config --libs)
-EXTRALIBS += $(shell Wand-config --libs)
+CFLAGS = -O2 $(shell pkg-config --cflags ImageMagick++)
+LIBS   = $(shell pkg-config --libs ImageMagick++)
 EXTRAFLAGS += -std=c++0x
 
 all:
