@@ -1,6 +1,6 @@
 A simple tool so set system colours from the wallpaper image. Simply run make to compile.
 
 To run:
-	./wallcolour /path/to/image > myname.colors
+	./wallcolour 
 
-then copy myname.colors to .kde/share/apps/color-schemes
+then look for 'Wallpaper' in Color Scheme in System Settings.
