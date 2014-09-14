@@ -4,109 +4,170 @@
 #include <string>
 #include <list>
 #include <iomanip>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <Magick++.h>
 using namespace std;
 using namespace Magick;
 
 
-class ImageRGB {
+class ImageRGB
+{
 //string image_filename;
 public:
-   ImageRGB(string);
-   unsigned long red = 0, green = 0, blue = 0;
+    ImageRGB(string);
+    unsigned long red = 0, green = 0, blue = 0;
 };
 
 ImageRGB::ImageRGB(string image_filename)
 {
-   Image image(image_filename);
-   unsigned long counter = 0;
+    Image image(image_filename);
+    unsigned long counter = 0;
 
-   vector < pair < Color, unsigned long >> histogram;
-   colorHistogram(&histogram, image);
-   vector < pair < Color, unsigned long >> ::const_iterator p = histogram.begin();
+    vector < pair < Color, unsigned long >> histogram;
+    colorHistogram(&histogram, image);
+    vector < pair < Color, unsigned long >> ::const_iterator p = histogram.begin();
 
-   while (p != histogram.end())
-   {
-      red   = red + static_cast<int>(p->first.redQuantum());
-      green = green + static_cast<int>(p->first.greenQuantum());
-      blue  = blue + static_cast<int>(p->first.blueQuantum());
-      p++;
-      counter++;
-   }
+    while (p != histogram.end()) {
+        red   = red + static_cast<int>(p->first.redQuantum());
+        green = green + static_cast<int>(p->first.greenQuantum());
+        blue  = blue + static_cast<int>(p->first.blueQuantum());
+        p++;
+        counter++;
+    }
 
-   red   = red / counter * 255 / 65535;
-   green = green / counter * 255 / 65535;
-   blue  = blue / counter * 255 / 65535;
+    red   = red / counter * 255 / 65535;
+    green = green / counter * 255 / 65535;
+    blue  = blue / counter * 255 / 65535;
 }
 
 
-class SchemeFile {
+class SchemeFile
+{
 public:
-  SchemeFile(char *);
-  void SchemeReplace(string);
-  string baseContents;
+    SchemeFile(char *);
+    string SchemeReplace(string);
+    string baseContents;
 };
 
 SchemeFile::SchemeFile(char * filename)
 {
-  ifstream baseTemplate (filename);
-  
-  if (baseTemplate.is_open())
-  {
-    stringstream strStream;
-    strStream << baseTemplate.rdbuf();
-    baseContents = strStream.str();
-    baseTemplate.close();
-  }
-  else
-  {
-    cout << "Unable to open template file." << endl;
-    exit(EXIT_FAILURE);
-  }
-}
-  
+    ifstream baseTemplate (filename);
 
-void SchemeFile::SchemeReplace(string rgb_triplet)
+    if (baseTemplate.is_open()) {
+        stringstream strStream;
+        strStream << baseTemplate.rdbuf();
+        baseContents = strStream.str();
+        baseTemplate.close();
+    } else {
+        cout << "Unable to open template file." << endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+string SchemeFile::SchemeReplace(string rgbTriplet)
 {
-  baseContents.replace(baseContents.find("xxx,xxx,xxx"), rgb_triplet.length(), rgb_triplet);
-  cout << baseContents << endl;
+    baseContents.replace(baseContents.find("xxx,xxx,xxx"), rgbTriplet.length(), rgbTriplet);
+    // cout << baseContents << endl;
+    return baseContents;
 }
 
+string getWallpaper()
+{
+    string home = getenv("HOME");
+    string beshellConfigFile = home + "/.kde4/share/config/be.shell";
+    struct stat sb;
+    
+    stat(beshellConfigFile.c_str(), &sb);
+    
+    if (!S_ISREG(sb.st_mode))
+    {
+        beshellConfigFile = home +  "/.kde/share/config/be.shell";
+        stat(beshellConfigFile.c_str(), &sb);
+        
+        if (!S_ISREG(sb.st_mode))
+        {
+            cout << "really can't find it"<< endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    ifstream beConfig(beshellConfigFile);
+    
+    if (beConfig.is_open())
+    {
+        string aline;
+        size_t found;
+        while (beConfig.good())
+        {
+            getline(beConfig, aline);
+            found = aline.find("Wallpaper=");
+            if (found != string::npos)
+            {
+                string wallpaperFilename = aline.substr(10);
+                return wallpaperFilename;
+            }
+        }
+        beConfig.close();
+    }
+    else
+    {
+        cout << "failed opening config file" << endl;
+        exit(EXIT_FAILURE);
+    }
+}
 
+void writeScheme(string contents)
+{
+    string home = getenv("HOME");
+    string kdeColorsDir = home + "/.kde4/share/apps/color-schemes";
+    struct stat sb;
+    
+    stat(kdeColorsDir.c_str(), &sb);
+    if (!S_ISDIR(sb.st_mode))
+    {
+        kdeColorsDir = home + "/.kde/share/apps/color-schemes";
+        stat(kdeColorsDir.c_str(), &sb);
+        
+        if (!S_ISDIR(sb.st_mode))
+        {
+            cout << " i really have no idea where to write to" << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    string restingPlace = kdeColorsDir + "/Wallpaper.colors";
+    ofstream ofile(restingPlace, ios::trunc);
+    
+    if (ofile.is_open())
+    {
+        ofile << contents;
+        ofile.close();
+    }
+    else
+    {
+        cout << "can't write output" << endl;
+    }
+}
+    
 int main(int argc, char **argv)
 {
-   if (argc != 2)
-   {
-      cout << "You need to give me a filename to work with." << endl;
-      return 1;
-   }
+    string myWall = getWallpaper();
+    ImageRGB wallpaper(myWall);
+    string replacementString = to_string(wallpaper.red) + "," + to_string(wallpaper.green) + \
+                               "," + to_string(wallpaper.blue);
 
-   ifstream given(argv[1]);
+    while (1) {
+        if (replacementString.length() < 11)
+            replacementString = replacementString + " ";
+        else
+            break;
+    }
 
-   if (!given)
-   {
-      cout << "Unable to open that filename." << endl;
-      return 1;
-   }
-
-   ImageRGB wallpaper(argv[1]);
-   
-   string replacementString = to_string(wallpaper.red) + "," + to_string(wallpaper.green) + \
-		"," + to_string(wallpaper.blue);
-   //cout << replacementString << endl;
-   
-   while (1) 
-   {
-		if (replacementString.length() < 11)
-			replacementString = replacementString + " ";
-		else
-			break;
-   }
-   
-   //cout << replacementString.length() << endl;
-   
-   SchemeFile schemeTemplate((char *)"colorscheme_template");
-   schemeTemplate.SchemeReplace(replacementString);
-   
-   return 0;
+    SchemeFile schemeTemplate((char *)"colorscheme_template");
+    string newScheme = schemeTemplate.SchemeReplace(replacementString);
+    writeScheme(newScheme);
+    return 0;
 }
