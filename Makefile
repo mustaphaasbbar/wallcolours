@@ -6,6 +6,6 @@ LIBS   = $(shell pkg-config --libs ImageMagick++)
 EXTRAFLAGS = -std=c++0x
 
 all:
-	g++ $(CFLAGS) $(LIBS) $(EXTRALIBS) $(EXTRAFLAGS) -o wallcolour $(PROGRAM_FILES)
+	g++ $(CFLAGS) $(LIBS)  $(EXTRAFLAGS) -o wallcolour $(PROGRAM_FILES)
 
 install: all
