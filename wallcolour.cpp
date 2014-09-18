@@ -8,6 +8,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <Magick++.h>
+
+#define  Pr  .299
+#define  Pg  .587
+#define  Pb  .114
+
 using namespace std;
 using namespace Magick;
 
@@ -138,13 +143,42 @@ void writeScheme(string contents)
     }
 }
 
+
+void changeSaturation(float *R, float *G, float *B, float change)
+{
+  float  P=sqrt(
+  (*R)*(*R)*Pr+
+  (*G)*(*G)*Pg+
+  (*B)*(*B)*Pb ) ;
+
+  *R=P+((*R)-P)*change;
+  *G=P+((*G)-P)*change;
+  *B=P+((*B)-P)*change;
+}
+
+
+
 int main(int argc, char **argv)
 {
     string myWall = getWallpaper();
     ImageRGB wallpaper(myWall);
+    float fRed = (float)wallpaper.red;
+    float fGreen = (float)wallpaper.green;
+    float fBlue = (float)wallpaper.blue;
+
+    changeSaturation(&fRed, &fGreen, &fBlue, 1.5);
+    
+    if (fRed > 255.0)
+		fRed = 255.0;
+	if (fGreen > 255.0)
+		fGreen = 255.0;
+	if (fBlue > 255.0)
+		fBlue = 255.0;
+		
+    
     string replacementString =
-        to_string(wallpaper.red) + "," + to_string(wallpaper.green) + "," +
-        to_string(wallpaper.blue);
+        to_string((int)fRed) + "," + to_string((int)fGreen) + "," +
+        to_string((int)fBlue);
 
     while (1) {
         if (replacementString.length() < 11)
