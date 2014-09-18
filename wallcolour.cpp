@@ -143,7 +143,7 @@ void writeScheme(string contents)
     }
 }
 
-
+//  public-domain function by Darel Rex Finley
 void changeSaturation(float *R, float *G, float *B, float change)
 {
   float  P=sqrt(
