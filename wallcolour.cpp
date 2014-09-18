@@ -146,14 +146,14 @@ void writeScheme(string contents)
 //  public-domain function by Darel Rex Finley
 void changeSaturation(float *R, float *G, float *B, float change)
 {
-  float  P=sqrt(
-  (*R)*(*R)*Pr+
-  (*G)*(*G)*Pg+
-  (*B)*(*B)*Pb ) ;
-
-  *R=P+((*R)-P)*change;
-  *G=P+((*G)-P)*change;
-  *B=P+((*B)-P)*change;
+    float  P=sqrt(
+    (*R)*(*R)*Pr+
+    (*G)*(*G)*Pg+
+    (*B)*(*B)*Pb ) ;
+    
+    *R=P+((*R)-P)*change;
+    *G=P+((*G)-P)*change;
+    *B=P+((*B)-P)*change;
 }
 
 
@@ -169,12 +169,12 @@ int main(int argc, char **argv)
     changeSaturation(&fRed, &fGreen, &fBlue, 1.5);
     
     if (fRed > 255.0)
-		fRed = 255.0;
-	if (fGreen > 255.0)
-		fGreen = 255.0;
-	if (fBlue > 255.0)
-		fBlue = 255.0;
-		
+        fRed = 255.0;
+    if (fGreen > 255.0)
+        fGreen = 255.0;
+    if (fBlue > 255.0)
+        fBlue = 255.0;
+        
     
     string replacementString =
         to_string((int)fRed) + "," + to_string((int)fGreen) + "," +
