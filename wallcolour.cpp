@@ -13,6 +13,8 @@
 #define  Pg  .587
 #define  Pb  .114
 
+#define SATURATION_MULTIPLIER 2.0
+
 using namespace std;
 using namespace Magick;
 
@@ -166,7 +168,7 @@ int main(int argc, char **argv)
     float fGreen = (float)wallpaper.green;
     float fBlue = (float)wallpaper.blue;
 
-    changeSaturation(&fRed, &fGreen, &fBlue, 1.5);
+    changeSaturation(&fRed, &fGreen, &fBlue, SATURATION_MULTIPLIER);
     
     if (fRed > 255.0)
         fRed = 255.0;
