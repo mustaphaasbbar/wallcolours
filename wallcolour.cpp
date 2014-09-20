@@ -13,7 +13,7 @@
 #define  Pg  .587
 #define  Pb  .114
 
-#define SATURATION_MULTIPLIER 2.0
+#define SATURATION_MULTIPLIER 1.5
 
 using namespace std;
 using namespace Magick;
@@ -79,43 +79,83 @@ string SchemeFile::SchemeReplace(string rgbTriplet)
     return baseContents;
 }
 
-string getWallpaper()
+
+
+class beShellConfig
+{
+    string contents;
+public:
+    beShellConfig();
+    string showContents();
+    string getWallpaper();
+};
+
+
+beShellConfig::beShellConfig()
 {
     string home = getenv("HOME");
-    string beshellConfigFile = home + "/.kde4/share/config/be.shell";
+    string kdeLocalPrefix = home + "/.kde4";
     struct stat sb;
-
-    stat(beshellConfigFile.c_str(), &sb);
-
-    if (!S_ISREG(sb.st_mode)) {
-        beshellConfigFile = home + "/.kde/share/config/be.shell";
-        stat(beshellConfigFile.c_str(), &sb);
-
-        if (!S_ISREG(sb.st_mode)) {
-            cout << "really can't find it" << endl;
-            exit(EXIT_FAILURE);
+    
+    stat(kdeLocalPrefix.c_str(), &sb);
+    
+    if (!S_ISDIR(sb.st_mode))
+    {
+        kdeLocalPrefix = home + "/.kde";
+        stat(kdeLocalPrefix.c_str(), &sb);
+        
+        if (!S_ISDIR(sb.st_mode))
+        {
+            cout << "unable to locate kde local directory." << endl;
         }
     }
-
-    ifstream beConfig(beshellConfigFile);
-
-    if (beConfig.is_open()) {
-        string aline;
-        size_t found;
-        while (beConfig.good()) {
-            getline(beConfig, aline);
-            found = aline.find("Wallpaper=");
-            if (found != string::npos) {
-                string wallpaperFilename = aline.substr(10);
-                return wallpaperFilename;
-            }
-        }
-        beConfig.close();
+    
+    string beshellConfigFile = kdeLocalPrefix + "/share/config/be.shell";
+    
+    ifstream shellConfig(beshellConfigFile);
+    
+    if (shellConfig.is_open()) {
+        stringstream strStream;
+        strStream << shellConfig.rdbuf();
+        contents = strStream.str();
+        shellConfig.close();
     } else {
-        cout << "failed opening config file" << endl;
+        cout << "Unable to open template file." << endl;
         exit(EXIT_FAILURE);
     }
 }
+
+string beShellConfig::showContents()
+{
+    return contents;
+}
+
+string beShellConfig::getWallpaper()
+{
+    string::iterator it = contents.begin();
+    string keyValue;
+    size_t found = contents.find("Wallpaper=");
+    
+    if (found != string::npos)
+    {
+        it = it + found + 10;
+        
+        for(it; it != contents.end(); it++)
+        {
+            if (*(it) == '\n')
+                break;
+            keyValue += *(it);
+        }
+    }
+    else
+    {
+        cout << "wallpaper name not found" << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    return keyValue;
+}
+
 
 void writeScheme(string contents)
 {
@@ -162,7 +202,9 @@ void changeSaturation(float *R, float *G, float *B, float change)
 
 int main(int argc, char **argv)
 {
-    string myWall = getWallpaper();
+    beShellConfig myShellConfig;
+    string myWall = myShellConfig.getWallpaper();
+    
     ImageRGB wallpaper(myWall);
     float fRed = (float)wallpaper.red;
     float fGreen = (float)wallpaper.green;
