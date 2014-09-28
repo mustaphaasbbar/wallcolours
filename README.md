@@ -1,6 +1,5 @@
-A simple tool to set system colours from the wallpaper image. Simply run make to compile.
+A simple tool to set system colours from the wallpaper image. Simply run make install. Requires ImageMagick++.
 
-To run:
-	./wallcolour 
+Just run 'wallcolour' then look for 'Wallpaper' Color Scheme in System Settings.
 
-then look for 'Wallpaper' Color Scheme in System Settings.
+Adjust to your own taste by editing the line SATURATION_MULTIPLIER in wallcolour.cpp 
