@@ -13,14 +13,15 @@
 #define  Pg  .587
 #define  Pb  .114
 
-#define SATURATION_MULTIPLIER 1.5
+#define SATURATION_MULTIPLIER 1.6
 
 using namespace std;
 using namespace Magick;
 
 
-class ImageRGB {
-  public:
+class ImageRGB
+{
+public:
     ImageRGB(string);
     unsigned long red = 0, green = 0, blue = 0;
 };
@@ -33,7 +34,7 @@ ImageRGB::ImageRGB(string image_filename)
     vector < pair < Color, unsigned long >>histogram;
     colorHistogram(&histogram, image);
     vector < pair < Color, unsigned long >>::const_iterator p =
-        histogram.begin();
+            histogram.begin();
 
     while (p != histogram.end()) {
         red = red + static_cast < int >(p->first.redQuantum());
@@ -49,14 +50,15 @@ ImageRGB::ImageRGB(string image_filename)
 }
 
 
-class SchemeFile {
-  public:
-    SchemeFile(char *);
+class SchemeFile
+{
+public:
+    SchemeFile(string);
     string SchemeReplace(string);
     string baseContents;
 };
 
-SchemeFile::SchemeFile(char *filename)
+SchemeFile::SchemeFile(string filename)
 {
     ifstream baseTemplate(filename);
 
@@ -96,24 +98,22 @@ beShellConfig::beShellConfig()
     string home = getenv("HOME");
     string kdeLocalPrefix = home + "/.kde4";
     struct stat sb;
-    
+
     stat(kdeLocalPrefix.c_str(), &sb);
-    
-    if (!S_ISDIR(sb.st_mode))
-    {
+
+    if (!S_ISDIR(sb.st_mode)) {
         kdeLocalPrefix = home + "/.kde";
         stat(kdeLocalPrefix.c_str(), &sb);
-        
-        if (!S_ISDIR(sb.st_mode))
-        {
+
+        if (!S_ISDIR(sb.st_mode)) {
             cout << "unable to locate kde local directory." << endl;
         }
     }
-    
+
     string beshellConfigFile = kdeLocalPrefix + "/share/config/be.shell";
-    
+
     ifstream shellConfig(beshellConfigFile);
-    
+
     if (shellConfig.is_open()) {
         stringstream strStream;
         strStream << shellConfig.rdbuf();
@@ -135,24 +135,20 @@ string beShellConfig::getWallpaper()
     string::iterator it = contents.begin();
     string keyValue;
     size_t found = contents.find("Wallpaper=");
-    
-    if (found != string::npos)
-    {
+
+    if (found != string::npos) {
         it = it + found + 10;
-        
-        for(it; it != contents.end(); it++)
-        {
+
+        for(it; it != contents.end(); it++) {
             if (*(it) == '\n')
                 break;
             keyValue += *(it);
         }
-    }
-    else
-    {
+    } else {
         cout << "wallpaper name not found" << endl;
         exit(EXIT_FAILURE);
     }
-    
+
     return keyValue;
 }
 
@@ -189,10 +185,10 @@ void writeScheme(string contents)
 void changeSaturation(float *R, float *G, float *B, float change)
 {
     float  P=sqrt(
-    (*R)*(*R)*Pr+
-    (*G)*(*G)*Pg+
-    (*B)*(*B)*Pb ) ;
-    
+                 (*R)*(*R)*Pr+
+                 (*G)*(*G)*Pg+
+                 (*B)*(*B)*Pb ) ;
+
     *R=P+((*R)-P)*change;
     *G=P+((*G)-P)*change;
     *B=P+((*B)-P)*change;
@@ -204,22 +200,22 @@ int main(int argc, char **argv)
 {
     beShellConfig myShellConfig;
     string myWall = myShellConfig.getWallpaper();
-    
+
     ImageRGB wallpaper(myWall);
     float fRed = (float)wallpaper.red;
     float fGreen = (float)wallpaper.green;
     float fBlue = (float)wallpaper.blue;
 
     changeSaturation(&fRed, &fGreen, &fBlue, SATURATION_MULTIPLIER);
-    
+
     if (fRed > 255.0)
         fRed = 255.0;
     if (fGreen > 255.0)
         fGreen = 255.0;
     if (fBlue > 255.0)
         fBlue = 255.0;
-        
-    
+
+
     string replacementString =
         to_string((int)fRed) + "," + to_string((int)fGreen) + "," +
         to_string((int)fBlue);
@@ -230,8 +226,10 @@ int main(int argc, char **argv)
         else
             break;
     }
-
-    SchemeFile schemeTemplate((char *) "colorscheme_template");
+    
+    string colTemplate = getenv("HOME");
+    colTemplate += "/.config/wallcolour/colorscheme_template";
+    SchemeFile schemeTemplate(colTemplate);
     string newScheme = schemeTemplate.SchemeReplace(replacementString);
     writeScheme(newScheme);
     return 0;
