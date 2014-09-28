@@ -13,6 +13,12 @@
 #define  Pg  .587
 #define  Pb  .114
 
+/* 0.0 is monochrome
+ * 1.0 is neutral (avg from the image)
+ * over 1.0 increases saturation
+ */
+
+
 #define SATURATION_MULTIPLIER 1.6
 
 using namespace std;
