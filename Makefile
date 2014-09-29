@@ -11,7 +11,7 @@ all:
 	g++ $(shell Magick++-config --cxxflags --cppflags) -Os -std=c++0x  -o wallcolour $(PROGRAM_FILES) $(shell Magick++-config --ldflags --libs)
 
 install: all
-	install wallcolour $(HOME)/bin 
+	sudo install wallcolour /usr/bin 
 	mkdir -pv $(HOME)/.config/wallcolour
 	install -m 644 colorscheme_template  $(HOME)/.config/wallcolour
 
