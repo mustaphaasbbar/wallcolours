@@ -19,7 +19,7 @@
  */
 
 
-#define SATURATION_MULTIPLIER 1.6
+#define SATURATION_MULTIPLIER 1.0
 
 using namespace std;
 using namespace Magick;
@@ -34,7 +34,9 @@ public:
 
 ImageRGB::ImageRGB(string image_filename)
 {
-    Image image(image_filename);
+    // Image image(image_filename);
+	Image image;
+	image.read(image_filename);
     unsigned long counter = 0;
 
     vector < pair < Color, unsigned long >>histogram;
